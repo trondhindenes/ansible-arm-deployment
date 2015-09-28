@@ -1,0 +1,25 @@
+---
+
+
+- hosts: localhost
+  tasks:
+    - name: set fact
+      set_fact: av_name="myavgroup2"
+    - name: set fact
+      set_fact: location="West US"
+    - name: deploy arm template
+      template:
+        src: template.json
+        dest: /tmp/template.json
+    - name: deploy resource
+      arm_deploy:
+        resource_group_name: "arm-python"
+        deployment_name: "arm-python"
+        tenant_id: "<tenant id guid>"
+        template_src_json: /tmp/template.json
+        client_id: "<client id guid>"
+        client_secret: '<client secret>'
+        subscription_id: "<subscription id guid>"
+        resource_group_location: "{{ location }}"
+    - name: cleanup
+      file: path=/tmp/template.json state=absent
