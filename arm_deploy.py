@@ -21,56 +21,71 @@
 DOCUMENTATION = '''
 ---
 module: arm_deploy
-short_description: Copy a file to a vCenter datastore
+short_description: Invoke Azure Resource Manager deployment
 description: 
-    - Upload files to a vCenter datastore
+    - Invokes an Azure Resource Manager (arm) deployment using a template file and optionally a parameter file.
 version_added: 2.0
-author: Dag Wieers (@dagwieers) <dag@wieers.com>
+author: Trond Hindenes (@trondhindenes) <trond@hindenes.com>
 options:
-  host:
+  client_id:
     description:
-      - The vCenter server on which the datastore is available.
-    required: true
-  login:
+      - Azure AD client id to use for auth
+    required: True
+  client_secret:
     description:
-      - The login name to authenticate on the vCenter server.
-    required: true
-  password:
+      - Azure AD client client secret to use for auth
+    required: True
+  tenant_id:
     description:
-      - The password to authenticate on the vCenter server.
-    required: true
-  src:
+      - Azure AD tenant id guid to use for auth
+    required: True
+  subscription_id:
     description:
-      - The file to push to vCenter
-    required: true
-  datacenter:
+      - Azure subscription id guid to use for auth
+    required: True
+  template_src_json:
     description:
-      - The datacenter on the vCenter server that holds the datastore.
-    required: true
-  datastore:
+      - Path to file containing template json
+    required: True
+  param_src_json:
     description:
-      - The datastore on the vCenter server to push files to.
-    required: true
-  path:
+      - Path to file containing template parameter json
+    required: False
+  resource_group_name:
     description:
-      - The file to push to the datastore on the vCenter server.
-    required: true
+      - Resource Group for deployment
+    required: True
+  resource_group_location:
+    description:
+      - Resource Group location (only needed if Ansible creates the resource group)
+    required: False
+  deployment_name:
+    description:
+      - Name of the deployment (this is only used for referencing the deployment)
+    required: True
 notes:
-  - "This module ought to be run from a system that can access vCenter directly and has the file to transfer.
-    It can be the normal remote target or you can change it either by using C(transport: local) or using C(delegate_to)."
-  - Tested on vSphere 5.5
+  - This module requres Azure v.1.0 on the target node (see https://azure.microsoft.com/en-us/documentation/articles/python-how-to-install/)
 '''
 
 EXAMPLES = '''
-- vsphere_copy: host=vhost login=vuser password=vpass src=/some/local/file datacenter='DC1 Someplace' datastore=datastore1 path=some/remote/file
-  transport: local
-- vsphere_copy: host=vhost login=vuser password=vpass src=/other/local/file datacenter='DC2 Someplace' datastore=datastore2 path=other/remote/file
-  delegate_to: other_system
+- hosts: localhost
+  tasks:
+    - name: deploy
+      arm_deploy:
+        resource_group_name: "arm-python"
+        deployment_name: "arm-python"
+        tenant_id: "<tenant id guid>"
+        template_src_json: /tmp/template.json
+        client_id: "<client id guid>"
+        client_secret: '<client secret code>'
+        subscription_id: "<subscription id guid>"
+        param_src_json: "param.json2"
 '''
 
 import sys
 import time
 import requests
+import os.path
 
 try:
     import azure.mgmt.resource
@@ -104,8 +119,9 @@ def main():
             tenant_id = dict(required=True),
             subscription_id = dict(required=True),
             template_src_json = dict(required=True),
-            param_src_json = dict(required=True),
+            param_src_json = dict(),
             resource_group_name = dict(required=True),
+            resource_group_location = dict(),
             deployment_name = dict(required=True)
         ),
         # Implementing check-mode using HEAD is impossible, since size/date is not 100% reliable
@@ -117,10 +133,16 @@ def main():
     tenant_id = module.params.get('tenant_id')
     subscription_id = module.params.get('subscription_id')
     template_src_json = module.params.get('template_src_json')
-    param_src_json = module.params.get('param_src_json')
+    if module.params['param_src_json']:
+        param_src_json = module.params.get('param_src_json')
+    else:
+        param_src_json = 'none'
     resource_group_name = module.params.get('resource_group_name')
     deployment_name = module.params.get('deployment_name')
-
+    if module.params['resource_group_location']:
+        resource_group_location = module.params.get('resource_group_location')
+    else:
+        resource_group_location = 'none'
     #try:
     endpoint='https://login.microsoftonline.com/' + tenant_id + '/oauth2/token'
     #authenticate to azure
@@ -135,13 +157,42 @@ def main():
     #construct resource client 
     resource_client = azure.mgmt.resource.ResourceManagementClient(creds)
     
+    #Check rg
+    try:
+        rg_list_result = resource_client.resource_groups.get(resource_group_name)
+        rg_does_exist = 'True'
+    except:
+        rg_does_exist = 'False'
+    
+    
+        
+    #Create RG if necessary
+    if (rg_does_exist == 'False'):
+        if (resource_group_location == 'none'):
+            module.fail_json(msg='Resource group does not exist, and resource_group_location isnt specified')
+
+        result = resource_client.resource_groups.create_or_update(
+            resource_group_name,
+            azure.mgmt.resource.ResourceGroup(
+            location=resource_group_location,
+            ),
+        )
+    
     #read template file and params file
     templatefile = open(template_src_json)
     template = templatefile.read()
-    paramfile = open(param_src_json)
-    param = paramfile.read()
     templatefile.close()
-    paramfile.close()
+    
+    #If param file doesnt exist, use an empty json thingy
+    if (param_src_json == 'none'):
+      param = '{}'
+    elif (os.path.isfile(param_src_json)):
+      paramfile = open(param_src_json)
+      param = paramfile.read()
+      paramfile.close()
+    else:
+      param = '{}'
+    
     
     #create deployment props
     properties = azure.mgmt.resource.resourcemanagement.DeploymentProperties(
