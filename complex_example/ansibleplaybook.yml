@@ -1,0 +1,23 @@
+---
+
+
+- hosts: localhost
+  vars_files:
+    - variables.yml #we need vars_files in each play
+  tasks:
+    - name: set fact
+      set_fact: location="West US"
+    - name: deploy arm template
+      template:
+        src: template.json
+        dest: /tmp/template.json
+    - name: deploy
+      arm_deploy:
+        resource_group_name: "arm-python4"
+        deployment_name: "arm-python4"
+        tenant_id: ""
+        template_src_json: /tmp/template.json
+        client_id: ""
+        client_secret: ''
+        subscription_id: ""
+        resource_group_location: "{{ location }}"

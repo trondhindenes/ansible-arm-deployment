@@ -1,0 +1,4 @@
+---
+availability_groups: 
+  - myav1
+  - myav2
