@@ -1,0 +1,197 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {},
+  "variables": {
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Compute/availabilitySets",
+      "name": "{{ avset_name }}",
+      "apiVersion": "2015-05-01-preview",
+      "location": "{{ location }}",
+      "properties": {}
+    },
+    {
+      "apiVersion": "2015-05-01-preview",
+      "type": "Microsoft.Network/publicIPAddresses",
+      "name": "publicIp",
+      "location": "{{ location }}",
+      "properties": {
+        "publicIPAllocationMethod": "Dynamic",
+        "dnsSettings": {
+          "domainNameLabel": "{{ public_dns_name }}"
+        }
+      }
+    },
+    {
+      "apiVersion": "2015-05-01-preview",
+      "type": "Microsoft.Storage/storageAccounts",
+      "name": "{{ storage_account_name }}",
+      "location": "{{ location }}",
+      "properties": {
+        "accountType": "Standard_LRS"
+      }
+    },
+    {
+      "apiVersion": "2015-05-01-preview",
+      "type": "Microsoft.Network/virtualNetworks",
+      "name": "VNET",
+      "location": "{{ location }}",
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "{{ subnet_address_range }}"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "{{ subnet_name }}",
+            "properties": {
+              "addressPrefix": "{{ subnet_address_range }}"
+            }
+          }
+        ]
+      }
+    }
+    ,
+        {
+      "apiVersion": "2015-05-01-preview",
+      "name": "loadBalancer",
+      "type": "Microsoft.Network/loadBalancers",
+      "location": "{{ location }}",
+      "dependsOn": [
+        "Microsoft.Network/publicIPAddresses/publicIp"
+      ],
+      "properties": {
+        "frontendIPConfigurations": [
+          {
+            "name": "LBFE",
+            "properties": {
+              "publicIPAddress": {
+                "id": "/subscriptions/{{ subscription_id }}/resourceGroups/{{ resource_group_name }}/providers/Microsoft.Network/publicIPAddresses/publicIp"
+              }
+            }
+          }
+        ],
+        "backendAddressPools": [
+          {
+            "name": "LBBAP"
+          }
+        ],
+        "inboundNatRules": [
+          {% for item in vm_name %}
+          {
+            "name": "rdp{{ item }}",
+            "properties": {
+              "frontendIPConfiguration": {
+                "id": "/subscriptions/{{ subscription_id }}/resourceGroups/{{ resource_group_name }}/providers/Microsoft.Network/loadBalancers/loadBalancer/inboundNatRules/rdp{{ item }}"
+              },
+              "protocol": "tcp",
+              "frontendPort": "{{ rdp_frontend_port + loop.index }}",
+              "backendPort": 3389,
+              "enableFloatingIP": false
+            }
+          }
+        {% if not loop.last %}
+        ,
+        {% endif %}
+        {% endfor %}
+        ]
+      }
+    }
+    ,
+    {% for item in vm_name %}
+    {
+      "apiVersion": "2015-05-01-preview",
+      "type": "Microsoft.Network/networkInterfaces",
+      {# the name will be generated based on "item" and appended "nic", for example rdpvm03-nic  #}
+      "name": "{{ item }}-nic",
+      "location": "{{ location }}",
+      "dependsOn": [
+        "Microsoft.Network/virtualNetworks/VNET",
+        "Microsoft.Network/loadBalancers/loadBalancer"
+      ],
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "subnet": {
+                "id": "/subscriptions/{{ subscription_id }}/resourceGroups/{{ resource_group_name }}/providers/Microsoft.Network/virtualNetworks/VNET/subnets/{{ subnet_name }}"
+              },
+              "loadBalancerBackendAddressPools": [
+                {
+                  "id": "/subscriptions/{{ subscription_id }}/resourceGroups/{{ resource_group_name }}/providers/Microsoft.Network/loadBalancers/loadBalancer/backendAddressPools/LBBAP"
+                }
+              ],
+              "loadBalancerInboundNatRules": [
+                {
+                  "id": "/subscriptions/{{ subscription_id }}/resourceGroups/{{ resource_group_name }}/providers/Microsoft.Network/loadBalancers/loadBalancer/inboundNatRules/rdprdpvm01"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+    ,
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Compute/virtualMachines",
+      "name": "{{ item }}",
+      "location": "{{ location }}",
+      "dependsOn": [
+        "Microsoft.Storage/storageAccounts/{{ storage_account_name }}",
+        "Microsoft.Network/networkInterfaces/{{ item }}-nic"
+      ],
+      "properties": {
+        "availabilitySet": {
+          "id": "/subscriptions/{{ subscription_id }}/resourceGroups/{{ resource_group_name }}/providers/Microsoft.Compute/availabilitySets/MYAVSET"
+        },
+        "hardwareProfile": {
+          "vmSize": "Standard_A2"
+        },
+        "osProfile": {
+          "computername": "{{ item }}",
+          "adminUsername": "{{ admin_username }}",
+          "adminPassword": "{{ admin_password }}"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "{{ image_publisher }}",
+            "offer": "{{ image_offer }}",
+            "sku": "{{ image_sku }}",
+            "version": "latest"
+          },
+          "osDisk": {
+            "name": "osdisk",
+            "vhd": {
+              "uri": "http://{{ storage_account_name }}.blob.core.windows.net/vhds/{{ item }}-osdisk.vhd"
+            },
+            "caching": "ReadWrite",
+            "createOption": "FromImage"
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id":"/subscriptions/{{ subscription_id }}/resourceGroups/{{ resource_group_name }}/providers/Microsoft.Network/networkInterfaces/{{ item }}-nic"
+            }
+          ]
+        },
+        "diagnosticsProfile": {
+          "bootDiagnostics": {
+             "enabled": "true",
+             "storageUri": "http://{{ storage_account_name }}.blob.core.windows.net"
+          }
+        }
+      }
+    }
+        {% if not loop.last %}
+    ,
+    {% endif %}
+    {% endfor %}
+  ]
+}

@@ -1,0 +1,24 @@
+---
+- hosts: localhost
+  vars_files:
+    - variables.yml #we need vars_files in each play
+  tasks:
+    - name: deploy arm template
+      template:
+        src: newtemplate.json
+        dest: /tmp/ansibletemplate.json
+    - name: deploy
+      arm_deploy:
+        resource_group_name: "{{ resource_group_name }}"
+        deployment_name: "rdpthing"
+        tenant_id: "<tenantid>"
+        template_src_json: /tmp/ansibletemplate.json
+        client_id: "<clientid>"
+        client_secret: '<clientsecret>'
+        subscription_id: "{{ subscription_id }}"
+        resource_group_location: "{{ location }}"
+    - name: cleanup
+      file:
+        path: /tmp/ansibletemplate.json
+        state: absent
+

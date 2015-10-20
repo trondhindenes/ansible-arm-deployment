@@ -1,0 +1,18 @@
+---
+address_range: "10.0.0.0/16"
+subnet_address_range: "10.0.0.0/24"
+subnet_name: "subnet"
+location: "West Europe"
+public_dns_name: "trondhrdpthingy"
+storage_account_name: "thrdpstoeu"
+avset_name: "myavset"
+rdp_frontend_port: 3389
+vm_name:
+  - rdpvm03
+admin_username: "thadministrator"
+admin_password: "<passoid>"
+image_publisher: "MicrosoftWindowsServer"
+image_offer: "WindowsServer"
+image_sku: "2012-R2-Datacenter"
+subscription_id: "<subscriptionid>"
+resource_group_name: "rdpthing"
