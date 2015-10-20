@@ -9,6 +9,7 @@ avset_name: "myavset"
 rdp_frontend_port: 3389
 vm_name:
   - rdpvm03
+  - rdpvm04
 admin_username: "thadministrator"
 admin_password: "<passoid>"
 image_publisher: "MicrosoftWindowsServer"
