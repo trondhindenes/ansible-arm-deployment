@@ -217,7 +217,7 @@ def main():
         if status.deployment.properties.provisioning_state == 'Succeeded':
             break
         if status.deployment.properties.provisioning_state == 'Failed':
-            module.fail_json(msg='Deployment failed with status code' + status.deployment.properties.status_code)
+            module.fail_json(msg='Deployment failed with status code' + status.deployment.properties.statuscode)
             break
     #except:
     #    module.fail_json(msg=sys.exc_info()[0],endpoint=endpoint)
