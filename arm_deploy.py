@@ -95,7 +95,7 @@ try:
     HAS_ARM = True
 except ImportError:
     HAS_ARM = False
-    
+
 if not HAS_ARM:
     module.fail_json(msg='azure python sdk required for this module')
 
@@ -216,8 +216,13 @@ def main():
         print(status.deployment.properties.provisioning_state)
         if status.deployment.properties.provisioning_state == 'Succeeded':
             break
+        if status.deployment.properties.provisioning_state == 'Failed':
+            module.fail_json(msg='Deployment failed')
+            break
     #except:
     #    module.fail_json(msg=sys.exc_info()[0],endpoint=endpoint)
+
+
 
     module.exit_json(changed=True, status=status.request_id)
 

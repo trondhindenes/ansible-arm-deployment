@@ -100,6 +100,8 @@ def get_token_from_client_credentials(endpoint, client_id, client_secret):
     }
     response = requests.post(endpoint, data=payload).json()
     return response['access_token']
+    
+
 
 def main():
     module = AnsibleModule(
@@ -177,12 +179,27 @@ def main():
       'Authorization': 'Bearer ' + auth_token
     }
     
+    class Object(object):
+      pass
+
+    returnobj = Object()
+    
+    
     if (src_json == 'none'):
       result = requests.put(url,headers=headers)
     else:
       result = requests.put(url,headers=headers, data=jsonpayload)
+    
+    returnobj.status_code = result.status_code
+    returnobj.url = url
+    
+    if((result.status_code == 200) or (result.status_code == 201)):
+      returnobj.changed = True
+      module.exit_json(changed=True, status_code=result.status_code, url=url)
+    else:
+      module.fail_json(msg='Error',status_code=result.status_code, url=url)
 
-    module.exit_json(changed=True, status=result.text)
+    module.exit_json(changed=True, status=result.text, token=auth_token, url=url)
 
 # Import module snippets
 from ansible.module_utils.basic import *
