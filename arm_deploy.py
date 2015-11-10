@@ -87,6 +87,8 @@ import time
 import requests
 import os.path
 
+HAS_ARM = False
+
 try:
     import azure.mgmt.resource
     from azure.mgmt.common import SubscriptionCloudCredentials
@@ -94,10 +96,7 @@ try:
     import azure.mgmt.network
     HAS_ARM = True
 except ImportError:
-    HAS_ARM = False
-
-if not HAS_ARM:
-    module.fail_json(msg='azure python sdk required for this module')
+    pass
 
 
 def get_token_from_client_credentials(endpoint, client_id, client_secret):
@@ -127,6 +126,11 @@ def main():
         # Implementing check-mode using HEAD is impossible, since size/date is not 100% reliable
         supports_check_mode = False,
     )
+    
+    
+    if not HAS_ARM:
+        module.fail_json(msg='azure python sdk required for this module')
+
 
     client_id = module.params.get('client_id')
     client_secret = module.params.get('client_secret')
