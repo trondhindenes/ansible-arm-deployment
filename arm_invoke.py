@@ -78,7 +78,7 @@ import time
 import requests
 import os.path
 
-    HAS_ARM = False
+HAS_ARM = False
 
 try:
     import azure.mgmt.resource
