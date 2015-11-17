@@ -196,7 +196,7 @@ def main():
     
     if((result.status_code == 200) or (result.status_code == 201)):
       returnobj.changed = True
-      module.exit_json(changed=True, status_code=result.status_code, url=url)
+      module.exit_json(changed=True, status_code=result.status_code, url=url, content=result.json())
     else:
       module.fail_json(msg='Error',status_code=result.status_code, url=url)
 
