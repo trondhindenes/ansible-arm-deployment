@@ -185,7 +185,9 @@ def main():
       jsonfilefile = open(src_json)
       jsonpayload = jsonfilefile.read()
       jsonfilefile.close()
-    
+    else:
+      jsonpayload = None
+      
     url = "https://management.azure.com/subscriptions/" + subscription_id + "/resourceGroups/" + resource_group_name + "/" + resource_url
     headers = {
       'Content-Type': 'application/json',
