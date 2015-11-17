@@ -181,7 +181,7 @@ def main():
           )
       
     #read template file and params file
-    if (src_json == 'none'):
+    if (src_json != 'none'):
       jsonfilefile = open(src_json)
       jsonpayload = jsonfilefile.read()
       jsonfilefile.close()
