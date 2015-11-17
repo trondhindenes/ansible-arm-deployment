@@ -213,10 +213,10 @@ def main():
         result = requests.put(url,headers=headers, data=jsonpayload)
     
     if ((does_exist == False) and (p['state'] == 'absent')):
-      module.exit_json(changed=False, status=result.text, url=url)
+      module.exit_json(changed=False, status=None, url=url)
     
     if ((does_exist == True) and (p['state'] == 'present')):
-      module.exit_json(changed=False, status=result.text, url=url)
+      module.exit_json(changed=False, status=result.json(), url=url)
     
     if ((does_exist == True) and (p['state'] == 'absent')):
       result = requests.delete(url,headers=headers)
