@@ -117,7 +117,7 @@ def main():
             src_json = dict(),
             resource_group_name = dict(required=True),
             resource_group_location = dict(),
-            resource_url = dict(required=True)
+            resource_url = dict(required=True),
             state = dict(default='present', choices=['absent', 'present']),
             force = dict(default='no', type='bool')
         ),
