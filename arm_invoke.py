@@ -176,7 +176,9 @@ def main():
     jsonfilefile.close()
     
     url = "https://management.azure.com/subscriptions/" + subscription_id + "/resourceGroups/" + resource_group_name + "/" + resource_url
-    headers = {'Content-Type': 'application/json',
+    headers = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
       'Authorization': 'Bearer ' + auth_token
     }
     
