@@ -55,6 +55,12 @@ options:
     description:
       - The portion of the request url after RG, for example providers/microsoft.sql/servers/myserver/databases/mydb?api-version=2014-04-01-preview
     required: False
+  state:
+    description:
+      - present/absent
+  force:
+    description:
+      - Forces
 notes:
   - This module requres Azure v.1.0 on the target node (see https://azure.microsoft.com/en-us/documentation/articles/python-how-to-install/)
 '''
@@ -112,6 +118,8 @@ def main():
             resource_group_name = dict(required=True),
             resource_group_location = dict(),
             resource_url = dict(required=True)
+            state = dict(default='present', choices=['absent', 'present']),
+            force = dict(default='no', type='bool'),
         ),
         # Implementing check-mode using HEAD is impossible, since size/date is not 100% reliable
         supports_check_mode = False,
@@ -156,24 +164,24 @@ def main():
     except:
         rg_does_exist = 'False'
     
-    
-        
     #Create RG if necessary
-    if (rg_does_exist == 'False'):
-        if (resource_group_location == 'none'):
-            module.fail_json(msg='Resource group does not exist, and resource_group_location isnt specified')
-
-        result = resource_client.resource_groups.create_or_update(
-            resource_group_name,
-            azure.mgmt.resource.ResourceGroup(
-            location=resource_group_location,
-            ),
-        )
-    
+    if p['state'] == 'present':
+      if (rg_does_exist == 'False'):
+          if (resource_group_location == 'none'):
+              module.fail_json(msg='Resource group does not exist, and resource_group_location isnt specified')
+  
+          result = resource_client.resource_groups.create_or_update(
+              resource_group_name,
+              azure.mgmt.resource.ResourceGroup(
+              location=resource_group_location,
+              ),
+          )
+      
     #read template file and params file
-    jsonfilefile = open(src_json)
-    jsonpayload = jsonfilefile.read()
-    jsonfilefile.close()
+    if (src_json == 'none'):
+      jsonfilefile = open(src_json)
+      jsonpayload = jsonfilefile.read()
+      jsonfilefile.close()
     
     url = "https://management.azure.com/subscriptions/" + subscription_id + "/resourceGroups/" + resource_group_name + "/" + resource_url
     headers = {
@@ -188,21 +196,38 @@ def main():
     returnobj = Object()
     
     
-    if (src_json == 'none'):
-      result = requests.put(url,headers=headers)
+    #Check if the resource exists
+    does_exist = requests.get(url,headers=headers)
+    if (does_exist.status_code == 404):
+      does_exist = False
     else:
-      result = requests.put(url,headers=headers, data=jsonpayload)
+      does_exist = True
+    
+    if ((does_exist == False) and (p['state'] == 'present'))
+      if (src_json == 'none'):
+        result = requests.put(url,headers=headers)
+      else:
+        result = requests.put(url,headers=headers, data=jsonpayload)
+    
+    if ((does_exist == False) and (p['state'] == 'absent')):
+      module.exit_json(changed=False, status=result.text, url=url)
+    
+    if ((does_exist == True) and (p['state'] == 'present')):
+      module.exit_json(changed=False, status=result.text, url=url)
+    
+    if ((does_exist == True) and (p['state'] == 'absent')):
+      result = requests.delete(url,headers=headers)
     
     returnobj.status_code = result.status_code
     returnobj.url = url
     
-    if((result.status_code == 200) or (result.status_code == 201)):
+    if result.status_code in (200,201,204):
       returnobj.changed = True
       module.exit_json(changed=True, status_code=result.status_code, url=url, content=result.json())
     else:
       module.fail_json(msg='Error',status_code=result.status_code, url=url)
 
-    module.exit_json(changed=True, status=result.text, token=auth_token, url=url)
+    module.exit_json(changed=True, status=result.text, url=url)
 
 # Import module snippets
 from ansible.module_utils.basic import *
