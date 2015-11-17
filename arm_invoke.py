@@ -202,8 +202,8 @@ def main():
     
     
     #Check if the resource exists
-    does_exist = requests.get(url,headers=headers)
-    if does_exist.status_code in (400,404):
+    does_exist_request = requests.get(url,headers=headers)
+    if does_exist_request.status_code in (400,404):
       does_exist = False
     else:
       does_exist = True
@@ -218,7 +218,7 @@ def main():
       module.exit_json(changed=False, status=None, url=url)
     
     if ((does_exist == True) and (p['state'] == 'present')):
-      module.exit_json(changed=False, status=does_exist.json(), url=url)
+      module.exit_json(changed=False, status=does_exist_request.json(), url=url)
     
     if ((does_exist == True) and (p['state'] == 'absent')):
       result = requests.delete(url,headers=headers)
