@@ -1,0 +1,9 @@
+{ 
+    "location": "East US", 
+    "tags": {"key": "value"}, 
+    "properties": { 
+        "version": "2.0", 
+        "administratorLogin": "MyAdminAccount", 
+        "administratorLoginPassword": "Kerbb99kkjjer83773" 
+    } 
+} 

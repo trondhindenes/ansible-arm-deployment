@@ -1,0 +1,23 @@
+- hosts: localhost
+  tasks:
+    - name: deploy arm template
+      template:
+        src: sqlserver.json
+        dest: /tmp/sqlserver.json
+    - name: deploy
+      arm_invoke:
+        resource_group_name: "arm-python098"
+        resource_url: "providers/Microsoft.Sql/servers/{{ item }}?api-version=2014-04-01-preview"
+        tenant_id: "<mytenant>"
+        src_json: /tmp/sqlserver.json
+        client_id: "<clientid>"
+        client_secret: '<clientsecret>'
+        subscription_id: "<subscription>"
+        resource_group_location: "West US"
+        state: present
+      with_items:
+        - thdb10
+        - thdb11
+        - thdb12
+        - thdb13
+        - thdb14
