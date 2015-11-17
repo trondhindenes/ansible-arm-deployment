@@ -206,7 +206,7 @@ def main():
     else:
       does_exist = True
     
-    if ((does_exist == False) and (p['state'] == 'present'))
+    if ((does_exist == False) and (p['state'] == 'present')):
       if (src_json == 'none'):
         result = requests.put(url,headers=headers)
       else:
