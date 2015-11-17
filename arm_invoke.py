@@ -229,7 +229,7 @@ def main():
     if result.status_code in (200,201):
       returnobj.changed = True
       module.exit_json(changed=True, status_code=result.status_code, url=url, content=result.json())
-    elif result.status_code in (204):
+    elif result.status_code == 204:
       module.exit_json(changed=True, status_code=result.status_code, url=url)
     else:
       module.fail_json(msg='Error',status_code=result.status_code, url=url)
