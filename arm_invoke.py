@@ -125,6 +125,8 @@ def main():
         supports_check_mode = False,
     )
 
+    p = module.params
+
     if not HAS_ARM:
         module.fail_json(msg='azure python sdk required for this module')
 
@@ -142,6 +144,7 @@ def main():
         resource_group_location = module.params.get('resource_group_location')
     else:
         resource_group_location = 'none'
+    
     url_method = 'put'
     #try:
     endpoint='https://login.microsoftonline.com/' + tenant_id + '/oauth2/token'
