@@ -203,7 +203,7 @@ def main():
     
     #Check if the resource exists
     does_exist = requests.get(url,headers=headers)
-    if (does_exist.status_code == 404):
+    if does_exist.status_code in (400,404):
       does_exist = False
     else:
       does_exist = True
