@@ -58,9 +58,6 @@ options:
   state:
     description:
       - present/absent
-  force:
-    description:
-      - Forces
 notes:
   - This module requres Azure v.1.0 on the target node (see https://azure.microsoft.com/en-us/documentation/articles/python-how-to-install/)
 '''
@@ -77,6 +74,7 @@ EXAMPLES = '''
         client_id: "<client id guid>"
         client_secret: '<client secret code>'
         subscription_id: "<subscription id guid>"
+        state: present
 '''
 
 import sys
@@ -118,8 +116,7 @@ def main():
             resource_group_name = dict(required=True),
             resource_group_location = dict(),
             resource_url = dict(required=True),
-            state = dict(default='present', choices=['absent', 'present']),
-            force = dict(default='no', type='bool')
+            state = dict(default='present', choices=['absent', 'present'])
         ),
         # Implementing check-mode using HEAD is impossible, since size/date is not 100% reliable
         supports_check_mode = False,
@@ -215,10 +212,10 @@ def main():
         result = requests.put(url,headers=headers, data=jsonpayload)
     
     if ((does_exist == False) and (p['state'] == 'absent')):
-      module.exit_json(changed=False, status=None, url=url)
+      module.exit_json(changed=False, status_code=None, url=url)
     
     if ((does_exist == True) and (p['state'] == 'present')):
-      module.exit_json(changed=False, status=does_exist_request.json(), url=url)
+      module.exit_json(changed=False, status_code=does_exist_request.status_code, url=url, content=does_exist_request.json())
     
     if ((does_exist == True) and (p['state'] == 'absent')):
       result = requests.delete(url,headers=headers)
