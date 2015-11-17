@@ -119,7 +119,7 @@ def main():
             resource_group_location = dict(),
             resource_url = dict(required=True)
             state = dict(default='present', choices=['absent', 'present']),
-            force = dict(default='no', type='bool'),
+            force = dict(default='no', type='bool')
         ),
         # Implementing check-mode using HEAD is impossible, since size/date is not 100% reliable
         supports_check_mode = False,
