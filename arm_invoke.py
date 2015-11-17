@@ -218,7 +218,7 @@ def main():
       module.exit_json(changed=False, status=None, url=url)
     
     if ((does_exist == True) and (p['state'] == 'present')):
-      module.exit_json(changed=False, status=result.json(), url=url)
+      module.exit_json(changed=False, status=does_exist.json(), url=url)
     
     if ((does_exist == True) and (p['state'] == 'absent')):
       result = requests.delete(url,headers=headers)
