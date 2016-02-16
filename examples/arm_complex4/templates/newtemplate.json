@@ -1,3 +1,5 @@
+{% set ARM_APIVER = "2015-06-15" %}
+{% set ARM_RG_BASE = "/subscriptions/"~{{ subscription_id }}~"/resourceGroups/"~{{ resource_group_name }}~"/providers" %}
 {
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
@@ -8,12 +10,12 @@
     {
       "type": "Microsoft.Compute/availabilitySets",
       "name": "{{ avset_name }}",
-      "apiVersion": "2015-05-01-preview",
+      "apiVersion": "{{ ARM_APIVER }}",
       "location": "{{ location }}",
       "properties": {}
     },
     {
-      "apiVersion": "2015-05-01-preview",
+      "apiVersion": "{{ ARM_APIVER }}",
       "type": "Microsoft.Network/publicIPAddresses",
       "name": "publicIp",
       "location": "{{ location }}",
@@ -25,7 +27,7 @@
       }
     },
     {
-      "apiVersion": "2015-05-01-preview",
+      "apiVersion": "{{ ARM_APIVER }}",
       "type": "Microsoft.Storage/storageAccounts",
       "name": "{{ storage_account_name }}",
       "location": "{{ location }}",
@@ -34,7 +36,7 @@
       }
     },
     {
-      "apiVersion": "2015-05-01-preview",
+      "apiVersion": "{{ ARM_APIVER }}",
       "type": "Microsoft.Network/virtualNetworks",
       "name": "VNET",
       "location": "{{ location }}",
@@ -56,7 +58,7 @@
     }
     ,
         {
-      "apiVersion": "2015-05-01-preview",
+      "apiVersion": "{{ ARM_APIVER }}",
       "name": "loadBalancer",
       "type": "Microsoft.Network/loadBalancers",
       "location": "{{ location }}",
@@ -69,7 +71,7 @@
             "name": "LBFE",
             "properties": {
               "publicIPAddress": {
-                "id": "/subscriptions/{{ subscription_id }}/resourceGroups/{{ resource_group_name }}/providers/Microsoft.Network/publicIPAddresses/publicIp"
+                "id": "{{ ARM_RG_BASE }}/Microsoft.Network/publicIPAddresses/publicIp"
               }
             }
           }
@@ -85,7 +87,7 @@
             "name": "rdp{{ item }}",
             "properties": {
               "frontendIPConfiguration": {
-                "id": "/subscriptions/{{ subscription_id }}/resourceGroups/{{ resource_group_name }}/providers/Microsoft.Network/loadBalancers/loadBalancer/inboundNatRules/rdp{{ item }}"
+                "id": "{{ ARM_RG_BASE }}/Microsoft.Network/loadBalancers/loadBalancer/inboundNatRules/rdp{{ item }}"
               },
               "protocol": "tcp",
               "frontendPort": "{{ rdp_frontend_port + loop.index }}",
@@ -103,7 +105,7 @@
     ,
     {% for item in vm_name %}
     {
-      "apiVersion": "2015-05-01-preview",
+      "apiVersion": "{{ ARM_APIVER }}",
       "type": "Microsoft.Network/networkInterfaces",
       {# the name will be generated based on "item" and appended "nic", for example rdpvm03-nic  #}
       "name": "{{ item }}-nic",
@@ -119,16 +121,16 @@
             "properties": {
               "privateIPAllocationMethod": "Dynamic",
               "subnet": {
-                "id": "/subscriptions/{{ subscription_id }}/resourceGroups/{{ resource_group_name }}/providers/Microsoft.Network/virtualNetworks/VNET/subnets/{{ subnet_name }}"
+                "id": "{{ ARM_RG_BASE }}/Microsoft.Network/virtualNetworks/VNET/subnets/{{ subnet_name }}"
               },
               "loadBalancerBackendAddressPools": [
                 {
-                  "id": "/subscriptions/{{ subscription_id }}/resourceGroups/{{ resource_group_name }}/providers/Microsoft.Network/loadBalancers/loadBalancer/backendAddressPools/LBBAP"
+                  "id": "{{ ARM_RG_BASE }}/Microsoft.Network/loadBalancers/loadBalancer/backendAddressPools/LBBAP"
                 }
               ],
               "loadBalancerInboundNatRules": [
                 {
-                  "id": "/subscriptions/{{ subscription_id }}/resourceGroups/{{ resource_group_name }}/providers/Microsoft.Network/loadBalancers/loadBalancer/inboundNatRules/rdprdpvm01"
+                  "id": "{{ ARM_RG_BASE }}/Microsoft.Network/loadBalancers/loadBalancer/inboundNatRules/rdprdpvm01"
                 }
               ]
             }
@@ -148,7 +150,7 @@
       ],
       "properties": {
         "availabilitySet": {
-          "id": "/subscriptions/{{ subscription_id }}/resourceGroups/{{ resource_group_name }}/providers/Microsoft.Compute/availabilitySets/MYAVSET"
+          "id": "{{ ARM_RG_BASE }}/Microsoft.Compute/availabilitySets/MYAVSET"
         },
         "hardwareProfile": {
           "vmSize": "Standard_A2"
@@ -177,7 +179,7 @@
         "networkProfile": {
           "networkInterfaces": [
             {
-              "id":"/subscriptions/{{ subscription_id }}/resourceGroups/{{ resource_group_name }}/providers/Microsoft.Network/networkInterfaces/{{ item }}-nic"
+              "id":"{{ ARM_RG_BASE }}/Microsoft.Network/networkInterfaces/{{ item }}-nic"
             }
           ]
         },
