@@ -109,13 +109,13 @@ def get_token_from_client_credentials(endpoint, client_id, client_secret):
 def main():
     module = AnsibleModule(
         argument_spec = dict(
-            client_id = dict(required=True),
-            client_secret = dict(required=True),
-            tenant_id = dict(required=True),
-            subscription_id = dict(required=True),
-            profile= dict(required=False),
-            ad_user = dict(required=False),
-            password = dict(required=False),
+            client_id=dict(required=False),
+            client_secret=dict(required=False),
+            tenant_id=dict(required=False),
+            subscription_id=dict(required=False),
+            profile=dict(required=False),
+            ad_user=dict(required=False),
+            password=dict(required=False),
             src_json = dict(),
             resource_group_name = dict(required=True),
             resource_group_location = dict(),
