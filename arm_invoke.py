@@ -85,10 +85,8 @@ import os.path
 HAS_ARM = False
 
 try:
-    import azure.mgmt.resource
-    from azure.mgmt.common import SubscriptionCloudCredentials
-    import azure.mgmt.compute
-    import azure.mgmt.network
+    from azure.mgmt.resource.resources.models import ResourceGroup
+    from azure.mgmt.resource.resources import ResourceManagementClient
     HAS_ARM = True
 except ImportError:
     pass
@@ -155,7 +153,7 @@ def main():
     creds = SubscriptionCloudCredentials(subscription_id, auth_token)
     
     #construct resource client 
-    resource_client = azure.mgmt.resource.ResourceManagementClient(creds)
+    resource_client = ResourceManagementClient(creds)
     
     #Check rg
     try:
