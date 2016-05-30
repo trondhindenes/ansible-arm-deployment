@@ -238,19 +238,19 @@ def main():
     else:
         does_exist = True
     
-    if (does_exist is False) and (module.params['state'] is 'present'):
+    if (does_exist == False) and (module.params['state'] == 'present'):
         if src_json is 'none':
             result = requests.put(url, headers=headers)
         else:
             result = requests.put(url, headers=headers, data=jsonpayload)
 
-    if (does_exist is False) and (module.params['state'] is 'absent'):
+    if (does_exist == False) and (module.params['state'] == 'absent'):
         module.exit_json(changed=False, status_code=None, url=url)
     
-    if (does_exist is True) and (module.params['state'] is 'present'):
+    if (does_exist == True) and (module.params['state'] == 'present'):
         module.exit_json(changed=False, status_code=does_exist_request.status_code, url=url, content=does_exist_request.json())
     
-    if (does_exist is True) and (module.params['state'] is 'absent'):
+    if (does_exist == True) and (module.params['state'] == 'absent'):
         result = requests.delete(url, headers=headers)
 
     if not result:
