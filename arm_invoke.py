@@ -146,9 +146,9 @@ def main():
     endpoint='https://login.microsoftonline.com/' + tenant_id + '/oauth2/token'
     #authenticate to azure
     auth_token = get_token_from_client_credentials(
-    endpoint=endpoint ,
-    client_id=client_id,
-    client_secret=client_secret,
+        endpoint=endpoint,
+        client_id=client_id,
+        client_secret=client_secret,
     )
 
     creds = ServicePrincipalCredentials(client_id=client_id, secret=client_secret, tenant=tenant_id)
@@ -174,8 +174,8 @@ def main():
   
           result = resource_client.resource_groups.create_or_update(
               resource_group_name,
-              azure.mgmt.resource.ResourceGroup(
-              location=resource_group_location,
+              ResourceGroup(
+                location=resource_group_location,
               ),
           )
       
