@@ -86,7 +86,7 @@ HAS_ARM = False
 
 try:
     from azure.mgmt.resource.resources.models import ResourceGroup
-    from azure.mgmt.resource.resources import ResourceManagementClient
+    from azure.mgmt.resource.resources import ResourceManagementClient, ResourceManagementClientConfiguration
     from azure.common.credentials import ServicePrincipalCredentials
     HAS_ARM = True
 except ImportError:
@@ -154,10 +154,8 @@ def main():
     creds = ServicePrincipalCredentials(client_id=client_id, secret=client_secret, tenant=tenant_id)
     
     #construct resource client 
-    resource_client = ResourceManagementClient(
-        credentials=creds,
-        subscription_id=subscription_id
-    )
+    config = ResourceManagementClientConfiguration(creds, subscription_id)
+    resource_client = ResourceManagementClient(config)
     
     #Check rg
     try:
