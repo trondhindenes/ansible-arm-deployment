@@ -87,6 +87,7 @@ HAS_ARM = False
 try:
     from azure.mgmt.resource.resources.models import ResourceGroup
     from azure.mgmt.resource.resources import ResourceManagementClient
+    from azure.common.credentials import ServicePrincipalCredentials
     HAS_ARM = True
 except ImportError:
     pass
@@ -149,11 +150,14 @@ def main():
     client_id=client_id,
     client_secret=client_secret,
     )
-    
-    creds = SubscriptionCloudCredentials(subscription_id, auth_token)
+
+    creds = ServicePrincipalCredentials(client_id=client_id, secret=client_secret, tenant=tenant_id)
     
     #construct resource client 
-    resource_client = ResourceManagementClient(creds)
+    resource_client = ResourceManagementClient(
+        credentials=creds,
+        subscription_id=subscription_id
+    )
     
     #Check rg
     try:

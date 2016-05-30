@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="ad8a0fb9-a355-4751-8e22-3eb2da2bb50a" name="Deploy" url="http://thansible01.westeurope.cloudapp.azure.com">
+        <fileTransfer host="thansible01.westeurope.cloudapp.azure.com" port="22" rootFolder="/home/thadministrator/moduledev/arm_deploy" accessType="SFTP" username="thadministrator">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" />
+          </advancedOptions>
+          <option name="port" value="22" />
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>
