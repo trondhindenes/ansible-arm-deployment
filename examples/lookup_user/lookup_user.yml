@@ -1,0 +1,17 @@
+---
+- hosts: localhost
+  tasks:
+    - name: get user
+      register: result
+      arm_get_adobject:
+        tenant_id: "<tenantid>"
+        client_id: "<clientid>"
+        client_secret: '<clientsecret>'
+        subscription_id: "<subscriptionid>"
+        aad_upn: "<myuser@mytenant.com>"
+    - name: get the whole thing
+      debug:
+        msg: "{{ result }}"
+    - name: get the objectid
+      debug:
+        msg: "{{ result.content.objectId }}"
