@@ -231,6 +231,7 @@ def main():
     returnobj = Object()
 
     #Check if the resource exists
+    result = None
     does_exist_request = requests.get(url, headers=headers)
     if does_exist_request.status_code in (400, 404):
         does_exist = False
@@ -251,8 +252,9 @@ def main():
     
     if (does_exist is True) and (module.params['state'] is 'absent'):
         result = requests.delete(url, headers=headers)
-    
-    returnobj.status_code = result.status_code
+
+    if not result:
+        module.fail_json(msg="We shouldn't be here.")
     returnobj.url = url
     
     if result.status_code in (200,201):
