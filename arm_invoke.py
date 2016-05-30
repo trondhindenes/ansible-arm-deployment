@@ -184,6 +184,7 @@ def main():
 
     elif 'ad_user' in creds_params and 'password' in creds_params:
         creds = UserPassCredentials(creds_params['ad_user'], creds_params['password'])
+        auth_token = creds.token['access_token']
 
     #construct resource client 
     config = ResourceManagementClientConfiguration(creds, creds_params['subscription_id'])
