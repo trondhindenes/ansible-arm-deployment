@@ -199,24 +199,24 @@ def main():
     
     #Create RG if necessary
     if module.params['state'] == 'present':
-      if (rg_does_exist == 'False'):
-          if (resource_group_location == 'none'):
-              module.fail_json(msg='Resource group does not exist, and resource_group_location isnt specified')
-  
-          result = resource_client.resource_groups.create_or_update(
-              resource_group_name,
-              ResourceGroup(
-                location=resource_group_location,
-              ),
-          )
-      
+        if (rg_does_exist == 'False'):
+            if (resource_group_location == 'none'):
+                module.fail_json(msg='Resource group does not exist, and resource_group_location isnt specified')
+
+            result = resource_client.resource_groups.create_or_update(
+                resource_group_name,
+                ResourceGroup(
+                    location=resource_group_location,
+                ),
+            )
+
     #read template file and params file
     if src_json != 'none':
-      jsonfilefile = open(src_json)
-      jsonpayload = jsonfilefile.read()
-      jsonfilefile.close()
+        jsonfilefile = open(src_json)
+        jsonpayload = jsonfilefile.read()
+        jsonfilefile.close()
     else:
-      jsonpayload = None
+        jsonpayload = None
       
     url = "https://management.azure.com/subscriptions/" + creds_params['subscription_id'] + "/resourceGroups/" + resource_group_name + "/" + resource_url
     headers = {
@@ -226,31 +226,30 @@ def main():
     }
     
     class Object(object):
-      pass
+        pass
 
     returnobj = Object()
-    
-    
+
     #Check if the resource exists
     does_exist_request = requests.get(url, headers=headers)
-    if does_exist_request.status_code in (400,404):
+    if does_exist_request.status_code in (400, 404):
         does_exist = False
     else:
         does_exist = True
     
-    if ((does_exist == False) and (p['state'] == 'present')):
-        if (src_json == 'none'):
-            result = requests.put(url,headers=headers)
+    if (does_exist is False) and (module.params['state'] is 'present'):
+        if src_json is 'none':
+            result = requests.put(url, headers=headers)
         else:
-            result = requests.put(url,headers=headers, data=jsonpayload)
+            result = requests.put(url, headers=headers, data=jsonpayload)
 
-    if ((does_exist == False) and (module.params['state'] == 'absent')):
+    if (does_exist is False) and (module.params['state'] is 'absent'):
         module.exit_json(changed=False, status_code=None, url=url)
     
-    if ((does_exist == True) and (module.params['state'] == 'present')):
+    if (does_exist is True) and (module.params['state'] is 'present'):
         module.exit_json(changed=False, status_code=does_exist_request.status_code, url=url, content=does_exist_request.json())
     
-    if ((does_exist == True) and (module.params['state'] == 'absent')):
+    if (does_exist is True) and (module.params['state'] is 'absent'):
         result = requests.delete(url, headers=headers)
     
     returnobj.status_code = result.status_code
