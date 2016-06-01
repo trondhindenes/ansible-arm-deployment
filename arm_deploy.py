@@ -251,7 +251,11 @@ def main():
         module.fail_json(msg=result._exception.message)
 
     while True:
-        status = resource_client.deployments.get(resource_group_name, deployment_name)
+        try:
+            status = resource_client.deployments.get(resource_group_name, deployment_name)
+        except:
+            time.sleep(1)
+            status = resource_client.deployments.get(resource_group_name, deployment_name)
         time.sleep(1)
         if status.properties.provisioning_state == 'Succeeded':
             break
