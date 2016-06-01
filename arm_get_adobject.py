@@ -55,6 +55,10 @@ EXAMPLES = '''
 '''
 
 import requests
+import os.path
+import ConfigParser
+from os.path import expanduser
+import json
 
 HAS_ARM = False
 
