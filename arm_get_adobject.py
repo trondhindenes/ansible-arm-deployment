@@ -132,18 +132,18 @@ def main():
         creds_params[key] = val
 
     if 'client_id' in creds_params and 'client_secret' in creds_params:
-      endpoint = 'https://login.microsoftonline.com/' + creds_params['client_id'] + '/oauth2/token'
+      endpoint='https://login.microsoftonline.com/' + creds_params['tenant_id'] + '/oauth2/token'
       auth_token = get_token_from_client_credentials(
           endpoint=endpoint,
           client_id=creds_params['client_id'],
           client_secret=creds_params['client_secret'],
       )
     elif 'ad_user' in creds_params and 'password' in creds_params:
-        endpoint = 'https://login.microsoftonline.com/' + creds_params['client_id'] + '/oauth2/token'
+        endpoint='https://login.microsoftonline.com/common/oauth2/token'
         auth_token = get_token_from_client_credentials(
             endpoint=endpoint,
-            client_id=creds_params['client_id'],
-            client_secret=creds_params['client_secret'],
+            client_id=creds_params['ad_user'],
+            client_secret=creds_params['password'],
         )
 
 
