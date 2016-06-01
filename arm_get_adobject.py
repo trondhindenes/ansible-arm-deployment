@@ -140,7 +140,7 @@ def main():
       )
     else:
         module.fail_json(msg='module requires auth via client_id and client_secret')
-      '''
+    '''
     elif 'ad_user' in creds_params and 'password' in creds_params:
         endpoint='https://login.microsoftonline.com/common/oauth2/token'
         auth_token = get_token_from_client_credentials(
@@ -148,7 +148,7 @@ def main():
             client_id=creds_params['ad_user'],
             client_secret=creds_params['password'],
         )
-        ''''
+    ''''
 
     if aad_upn:
         uri = "https://graph.windows.net/" + tenant_id + "/users/" + aad_upn + "?api-version=1.6"
