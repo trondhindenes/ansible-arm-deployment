@@ -1,0 +1,22 @@
+---
+
+
+- hosts: localhost
+  tasks:
+    - name: set fact
+      set_fact: av_name="myavgroup2"
+    - name: set fact
+      set_fact: location="westeurope"
+    - name: deploy arm template
+      template:
+        src: template.json
+        dest: /tmp/template.json
+    - name: deploy resource
+      arm_deploy:
+        resource_group_name: "arm-python098"
+        deployment_name: "arm-python098"
+        profile: default
+        resource_group_location: "{{ location }}"
+        template_src_json: /tmp/template.json
+    - name: cleanup
+      file: path=/tmp/template.json state=absent
