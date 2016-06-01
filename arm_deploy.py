@@ -64,7 +64,7 @@ options:
       - Name of the deployment (this is only used for referencing the deployment)
     required: True
 notes:
-  - This module requres Azure v.1.0 on the target node (see https://azure.microsoft.com/en-us/documentation/articles/python-how-to-install/)
+  - This module requres Azure v.2.0.0RC3 on the target node (see https://azure.microsoft.com/en-us/documentation/articles/python-how-to-install/)
 '''
 
 EXAMPLES = '''
@@ -134,7 +134,6 @@ def main():
     )
     
     creds_params = {}
-    print( module.params.get('client_id'))
     if not HAS_ARM:
         module.fail_json(msg='azure python sdk required for this module')
 
