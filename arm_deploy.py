@@ -230,26 +230,12 @@ def main():
     if (param_src_json == 'none'):
         paramdata = None
     elif (os.path.isfile(param_src_json)):
-      paramfile = open(param_src_json, 'rU')
-      param = paramfile.readlines()
+      paramfile = open(param_src_json, 'r')
+      paramtxt = paramfile.read()
       paramfile.close()
-      paramdata = "".join(line.rstrip() for line in param)
+      paramdata = json.loads(paramtxt)
     else:
         paramdata = None
-    
-    module.log(templatedata)
-
-    #create deployment props
-
-    '''
-    properties = DeploymentProperties(
-      mode="incremental",
-      template=template,
-      parameters=param
-    )
-    deploy_parameter = azure.mgmt.resource.Deployment()
-    deploy_parameter.properties=properties
-    '''
 
     #invoke the thing
     result = resource_client.deployments.create_or_update(
@@ -267,16 +253,11 @@ def main():
     while True:
         status = resource_client.deployments.get(resource_group_name, deployment_name)
         time.sleep(1)
-        print(status.deployment.properties.provisioning_state)
-        if status.deployment.properties.provisioning_state == 'Succeeded':
+        if status.properties.provisioning_state == 'Succeeded':
             break
-        if status.deployment.properties.provisioning_state == 'Failed':
+        if status.properties.provisioning_state == 'Failed':
             module.fail_json(msg='Deployment failed')
             break
-    #except:
-    #    module.fail_json(msg=sys.exc_info()[0],endpoint=endpoint)
-
-
 
     module.exit_json(changed=True, status=status.request_id)
 
