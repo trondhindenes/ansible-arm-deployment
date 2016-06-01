@@ -263,7 +263,7 @@ def main():
             module.fail_json(msg='Deployment failed')
             break
 
-    module.exit_json(changed=True, status=status.request_id)
+    module.exit_json(changed=True, correlation_id=status.properties.correlation_id)
 
 # Import module snippets
 from ansible.module_utils.basic import *
