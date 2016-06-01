@@ -2,6 +2,7 @@
 
 
 - hosts: localhost
+  gather_facts: no
   tasks:
     - name: set fact
       set_fact: av_name="myavgroup2"
