@@ -139,7 +139,7 @@ def main():
     resource_group_name = module.params.get('resource_group_name')
     resource_url = module.params.get('resource_url')
     if module.params['raw_url']:
-        profile = module.params.get('raw_url')
+        raw_url = module.params.get('raw_url')
     
     url_method = 'get'
     #try:
