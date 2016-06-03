@@ -109,7 +109,7 @@ def main():
             ad_user=dict(required=False),
             password=dict(required=False),
             resource_group_name = dict(required=False),
-            resource_url = dict(required=False)
+            resource_url = dict(required=False),
             raw_url = dict(required=False)
         ),
         # Implementing check-mode using HEAD is impossible, since size/date is not 100% reliable
