@@ -151,9 +151,9 @@ def main():
             config = ConfigParser.SafeConfigParser()
             config.read(path)
       except Exception as exc:
-          self.fail("Failed to access {0}. Check that the file exists and you have read access. {1}".format(path, str(exc)))
+          module.fail_json(msg="Failed to access profile")
     if not config.has_section(profile):
-        self.fail("Config file does not appear to have section " + profile)
+        module.fail_json(msg="section not found in profile")
     for key, val in config.items(profile):
         creds_params[key] = val
 
@@ -210,7 +210,7 @@ def main():
         does_exist = True
 
     if (does_exist == False):
-        module.exit_json(changed=False, status_code=None, url=url)
+        module.exit_json(changed=False, status_code=None, url=url, content=None)
     
     if (does_exist == True):
         module.exit_json(changed=False, status_code=does_exist_request.status_code, url=url, content=does_exist_request.json())
