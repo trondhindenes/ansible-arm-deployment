@@ -263,7 +263,7 @@ def main():
     elif result.status_code == 204:
         module.exit_json(changed=True, status_code=result.status_code, url=url)
     else:
-        module.fail_json(msg='Error', status_code=result.status_code, url=url)
+        module.fail_json(msg='Error', status_code=result.status_code, url=url, msg=result.text)
 
     module.exit_json(changed=True, status=result.text, url=url)
 
