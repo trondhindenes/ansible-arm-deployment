@@ -183,9 +183,9 @@ def main():
         rg_does_exist = 'False'
     
     #Create RG if necessary
-    if module.params['state'] == 'present':
-        if (rg_does_exist == 'False'):
-                module.fail_json(msg="Resoruce group does not exist")
+    if (rg_does_exist == 'False'):
+            module.fail_json(msg="Resoruce group does not exist")
+
     if raw_url:
         url = "https://management.azure.com" + raw_url
     else:
