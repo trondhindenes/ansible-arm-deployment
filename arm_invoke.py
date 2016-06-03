@@ -257,13 +257,34 @@ def main():
         module.fail_json(msg="We shouldn't be here.")
     returnobj.url = url
     
-    if result.status_code in (200,201):
+    if result.status_code in (200, 201):
         returnobj.changed = True
+        if result.headers.get('azure-asyncoperation'):
+            # This is an async operation, pull until done
+            async_url = result.headers.get('azure-asyncoperation')
+            currentOp = 'updating'
+            while currentOp == 'updating':
+                print(currentOp)
+                result = requests.get(async_url, headers=headers)
+                currentStatus = json.loads(result.text)['status']
+                if str(currentStatus).lower() == 'failed':
+                    currentOp = "failed"
+                    errorMsg = json.loads(result.text)['error']['message']
+                    module.fail_json(msg=errorMsg, status_code=result.status_code, url=url)
+                elif str(currentStatus).lower() == 'inprogress':
+                    currentOp = 'updating'
+                    time.sleep(2)
+                elif str(currentStatus).lower() == 'succeeded':
+                    currentOp = 'succeeded'
+                    module.exit_json(changed=True, status_code=result.status_code, url=url, content=result.json())
+                else:
+                    pass
+
         module.exit_json(changed=True, status_code=result.status_code, url=url, content=result.json())
     elif result.status_code == 204:
         module.exit_json(changed=True, status_code=result.status_code, url=url)
     else:
-        module.fail_json(msg='Error', status_code=result.status_code, url=url, msg=result.text)
+        module.fail_json(msg='Error', status_code=result.status_code, url=url)
 
     module.exit_json(changed=True, status=result.text, url=url)
 
