@@ -20,10 +20,10 @@
 
 DOCUMENTATION = '''
 ---
-module: arm_invoke
-short_description: Invoke an azure resource manager operation
+module: arm_invoke_get
+short_description: Get the (json) result of an arm resource/resource group
 description: 
-    - Invoke an azure resource manager operation against a resource provider
+    - Get the (json) result of an arm resource/resource group
 version_added: 2.0
 author: Trond Hindenes (@trondhindenes) <trond@hindenes.com>
 options:
@@ -45,13 +45,16 @@ options:
     required: True
   resource_group_name:
     description:
-      - Resource Group for deployment
-    required: True
+      - Resource Group for deployment. Required if using "resource url", not if using "raw_url"
+    required: False
   resource_url:
     description:
       - The portion of the request url after RG, for example providers/microsoft.sql/servers/myserver/databases/mydb?api-version=2014-04-01-preview
     required: False
   raw_url:
+    description:
+        - Use if you want to specify the whole uri, e.g /subscriptions/xxx/providers/microsoft.sql?api-version=2014-01-preview. Useful when getting stuff which isn't inside a resource group. Mutually excludes "resource_url"
+    required: False        
 notes:
   - This module requres Azure v.1.0 on the target node (see https://azure.microsoft.com/en-us/documentation/articles/python-how-to-install/)
 '''
