@@ -24,25 +24,35 @@ module: arm_invoke
 short_description: Invoke an azure resource manager operation
 description: 
     - Invoke an azure resource manager operation against a resource provider
+      Authentication options are the same as for the in-box modules. See explanation at http://docs.ansible.com/ansible/azure_rm_deployment_module.html
 version_added: 2.0
 author: Trond Hindenes (@trondhindenes) <trond@hindenes.com>
 options:
   client_id:
     description:
       - Azure AD client id to use for auth
-    required: True
+    required: False
   client_secret:
     description:
       - Azure AD client client secret to use for auth
-    required: True
+    required: False
   tenant_id:
     description:
       - Azure AD tenant id guid to use for auth
-    required: True
+    required: False
   subscription_id:
     description:
       - Azure subscription id guid to use for auth
-    required: True
+    required: False
+  profile:
+    description: Security profile found in ~/.azure/credentials file. This can be used instead of the other auth-related options
+    required: False
+  ad_user:
+    description: Azure AD Username
+    required: False
+  password:
+    description: Password of the ad_user user
+    required: False
   src_json:
     description:
       - Path to file containing template json
@@ -59,7 +69,7 @@ options:
     description:
       - present/absent
 notes:
-  - This module requres Azure v.1.0 on the target node (see https://azure.microsoft.com/en-us/documentation/articles/python-how-to-install/)
+  - This module requres Azure v.2.0.0RC3 on the target node (see https://azure.microsoft.com/en-us/documentation/articles/python-how-to-install/)
 '''
 
 EXAMPLES = '''

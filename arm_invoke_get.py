@@ -24,25 +24,35 @@ module: arm_invoke_get
 short_description: Get the (json) result of an arm resource/resource group
 description: 
     - Get the (json) result of an arm resource/resource group
+      Authentication options are the same as for the in-box modules. See explanation at http://docs.ansible.com/ansible/azure_rm_deployment_module.html
 version_added: 2.0
 author: Trond Hindenes (@trondhindenes) <trond@hindenes.com>
 options:
   client_id:
     description:
       - Azure AD client id to use for auth
-    required: True
+    required: False
   client_secret:
     description:
       - Azure AD client client secret to use for auth
-    required: True
+    required: False
   tenant_id:
     description:
       - Azure AD tenant id guid to use for auth
-    required: True
+    required: False
   subscription_id:
     description:
       - Azure subscription id guid to use for auth
-    required: True
+    required: False
+  profile:
+    description: Security profile found in ~/.azure/credentials file. This can be used instead of the other auth-related options
+    required: False
+  ad_user:
+    description: Azure AD Username
+    required: False
+  password:
+    description: Password of the ad_user user
+    required: False
   resource_group_name:
     description:
       - Resource Group for deployment. Required if using "resource url", not if using "raw_url"
@@ -56,7 +66,7 @@ options:
         - Use if you want to specify the whole uri, e.g /subscriptions/xxx/providers/microsoft.sql?api-version=2014-01-preview. Useful when getting stuff which isn't inside a resource group. Mutually excludes "resource_url"
     required: False        
 notes:
-  - This module requres Azure v.1.0 on the target node (see https://azure.microsoft.com/en-us/documentation/articles/python-how-to-install/)
+  - This module requres Azure v.2.0.0RC3 on the target node (see https://azure.microsoft.com/en-us/documentation/articles/python-how-to-install/)
 '''
 
 EXAMPLES = '''

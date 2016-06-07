@@ -24,25 +24,35 @@ module: arm_deploy
 short_description: Invoke Azure Resource Manager deployment
 description: 
     - Invokes an Azure Resource Manager (arm) deployment using a template file and optionally a parameter file.
+      Authentication options are the same as for the in-box modules. See explanation at http://docs.ansible.com/ansible/azure_rm_deployment_module.html
 version_added: 2.0
 author: Trond Hindenes (@trondhindenes) <trond@hindenes.com>
 options:
   client_id:
     description:
       - Azure AD client id to use for auth
-    required: True
+    required: False
   client_secret:
     description:
       - Azure AD client client secret to use for auth
-    required: True
+    required: False
   tenant_id:
     description:
       - Azure AD tenant id guid to use for auth
-    required: True
+    required: False
   subscription_id:
     description:
       - Azure subscription id guid to use for auth
-    required: True
+    required: False
+  profile:
+    description: Security profile found in ~/.azure/credentials file. This can be used instead of the other auth-related options
+    required: False
+  ad_user:
+    description: Azure AD Username
+    required: False
+  password:
+    description: Password of the ad_user user
+    required: False
   template_src_json:
     description:
       - Path to file containing template json
@@ -196,7 +206,7 @@ def main():
     #construct resource client 
     config = ResourceManagementClientConfiguration(creds, creds_params['subscription_id'])
     resource_client = ResourceManagementClient(config)
-    
+
     #Check rg
     try:
         rg_list_result = resource_client.resource_groups.get(resource_group_name)
