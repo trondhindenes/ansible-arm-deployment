@@ -93,6 +93,7 @@ import requests
 import os.path
 import ConfigParser
 from os.path import expanduser
+import logging
 
 HAS_ARM = False
 
@@ -137,6 +138,11 @@ def main():
     )
 
     creds_params = {}
+
+    logging.basicConfig(level=logging.DEBUG,
+                        format='%(asctime)s %(levelname)s %(message)s',
+                        filename='/tmp/ansible_arm.log',
+                        filemode='w')
 
     if not HAS_ARM:
         module.fail_json(msg='azure python sdk required for this module')
@@ -237,9 +243,11 @@ def main():
         jsonfilefile.close()
     else:
         jsonpayload = None
-      
+
+
+
     url = "https://management.azure.com/subscriptions/" + creds_params['subscription_id'] + "/resourceGroups/" + resource_group_name + "/" + resource_url
-    module.log(str.format("Testing if resource already exists: {0}", url))
+    logging.info(str.format("Testing if resource already exists: {0}", url))
     headers = {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
