@@ -166,7 +166,7 @@ def main():
             config = ConfigParser.SafeConfigParser()
             config.read(path)
       except Exception as exc:
-          module.fail_json(msg="Failed to access profile")
+          module.fail_json(msg="Failed to access profile " + str(path))
     if not config.has_section(profile):
         module.fail_json(msg="section not found in profile")
     for key, val in config.items(profile):
