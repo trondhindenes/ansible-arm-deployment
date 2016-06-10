@@ -155,6 +155,8 @@ def main():
     resource_url = module.params.get('resource_url')
     if module.params['raw_url']:
         raw_url = module.params.get('raw_url')
+    else:
+        raw_url = None
     
     url_method = 'get'
     #try:
