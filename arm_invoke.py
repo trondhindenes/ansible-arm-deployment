@@ -173,7 +173,7 @@ def main():
     
     #authenticate to azure
     creds = None
-    
+
     if profile:
         path = expanduser("~/.azure/credentials")
         try:
@@ -239,6 +239,7 @@ def main():
         jsonpayload = None
       
     url = "https://management.azure.com/subscriptions/" + creds_params['subscription_id'] + "/resourceGroups/" + resource_group_name + "/" + resource_url
+    module.log(str.format("Testing if resource already exists: {0}", url))
     headers = {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
@@ -258,7 +259,7 @@ def main():
     else:
         does_exist = True
     
-    if (does_exist == False) and (module.params['state'] == 'present'):
+    if (does_exist is False) and (module.params['state'] is 'present'):
         if src_json is 'none':
             result = requests.put(url, headers=headers)
         else:
