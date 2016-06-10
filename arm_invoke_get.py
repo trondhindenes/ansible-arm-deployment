@@ -158,7 +158,9 @@ def main():
     
     url_method = 'get'
     #try:
-    
+
+    creds = None
+
     #authenticate to azure
     if profile:
         path = expanduser("~/.azure/credentials")

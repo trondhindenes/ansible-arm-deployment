@@ -177,7 +177,8 @@ def main():
     #try:
     
     #authenticate to azure
-    
+    creds = None
+
     if profile:
         path = expanduser("~/.azure/credentials")
         try:
