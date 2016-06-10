@@ -173,16 +173,16 @@ def main():
     
     #authenticate to azure
     if profile:
-      path = expanduser("~/.azure/credentials")
-      try:
+        path = expanduser("~/.azure/credentials")
+        try:
             config = ConfigParser.SafeConfigParser()
             config.read(path)
-      except Exception as exc:
-          self.fail("Failed to access {0}. Check that the file exists and you have read access. {1}".format(path, str(exc)))
-    if not config.has_section(profile):
-        self.fail("Config file does not appear to have section " + profile)
-    for key, val in config.items(profile):
-        creds_params[key] = val
+        except Exception as exc:
+          module.fail_json("Failed to access {0}. Check that the file exists and you have read access. {1}".format(path, str(exc)))
+        if not config.has_section(profile):
+            module.fail_json("Config file does not appear to have section " + profile)
+        for key, val in config.items(profile):
+            creds_params[key] = val
 
     if 'client_id' in creds_params and 'client_secret' in creds_params:
         endpoint='https://login.microsoftonline.com/' + creds_params['tenant_id'] + '/oauth2/token'
@@ -198,7 +198,13 @@ def main():
         creds = UserPassCredentials(creds_params['ad_user'], creds_params['password'])
         auth_token = creds.token['access_token']
 
-    #construct resource client 
+    # at this point, we should have creds and a subscription id
+    if not creds:
+        module.fail_json(msg="Unable to login to Azure with the current parameters/options")
+    if not creds_params['subscription_id']:
+        module.fail_json(msg="Unable to select a working Azure subscription given the current parameters/options")
+
+    #construct resource client
     config = ResourceManagementClientConfiguration(creds, creds_params['subscription_id'])
     resource_client = ResourceManagementClient(config)
     

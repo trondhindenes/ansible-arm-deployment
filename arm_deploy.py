@@ -142,7 +142,7 @@ def main():
         # Implementing check-mode using HEAD is impossible, since size/date is not 100% reliable
         supports_check_mode = False,
     )
-    
+
     creds_params = {}
     if not HAS_ARM:
         module.fail_json(msg='azure python sdk required for this module')
@@ -157,6 +157,8 @@ def main():
         creds_params['subscription_id'] = module.params.get('subscription_id')
     if module.params['profile']:
         profile = module.params.get('profile')
+    else:
+        profile = None
     if module.params['ad_user']:
         creds_params['ad_user'] = module.params.get('ad_user')
     if module.params['password']:
@@ -177,33 +179,40 @@ def main():
     #authenticate to azure
     
     if profile:
-      path = expanduser("~/.azure/credentials")
-      try:
+        path = expanduser("~/.azure/credentials")
+        try:
             config = ConfigParser.SafeConfigParser()
             config.read(path)
-      except Exception as exc:
-          self.fail("Failed to access {0}. Check that the file exists and you have read access. {1}".format(path, str(exc)))
-    if not config.has_section(profile):
-        self.fail("Config file does not appear to have section " + profile)
-    for key, val in config.items(profile):
-        creds_params[key] = val
+        except Exception as exc:
+            module.fail_json("Failed to access {0}. Check that the file exists and you have read access. {1}".format(path, str(exc)))
+
+        if not config.has_section(profile):
+            module.fail_json(("Config file does not appear to have section " + profile)
+        for key, val in config.items(profile):
+            creds_params[key] = val
 
     
     if 'client_id' in creds_params and 'client_secret' in creds_params:
-      endpoint='https://login.microsoftonline.com/' + creds_params['tenant_id'] + '/oauth2/token'
-      auth_token = get_token_from_client_credentials(
-          endpoint=endpoint,
-          client_id=creds_params['client_id'],
-          client_secret=creds_params['client_secret'],
-      )
-      creds = ServicePrincipalCredentials(client_id=creds_params['client_id'], secret=creds_params['client_secret'],
-                                          tenant=creds_params['tenant_id'])
+        endpoint='https://login.microsoftonline.com/' + creds_params['tenant_id'] + '/oauth2/token'
+        auth_token = get_token_from_client_credentials(
+            endpoint=endpoint,
+            client_id=creds_params['client_id'],
+            client_secret=creds_params['client_secret'],
+            )
+        creds = ServicePrincipalCredentials(client_id=creds_params['client_id'], secret=creds_params['client_secret'],
+                          tenant=creds_params['tenant_id'])
 
     elif 'ad_user' in creds_params and 'password' in creds_params:
-      creds = UserPassCredentials(creds_params['ad_user'], creds_params['password'])
-    
-          
-    #construct resource client 
+        creds = UserPassCredentials(creds_params['ad_user'], creds_params['password'])
+
+    # at this point, we should have creds and a subscription id
+    if not creds:
+        module.fail_json(msg="Unable to login to Azure with the current parameters/options")
+    if not creds_params['subscription_id']:
+        module.fail_json(
+            msg="Unable to select a working Azure subscription given the current parameters/options")
+
+    #construct resource client
     config = ResourceManagementClientConfiguration(creds, creds_params['subscription_id'])
     resource_client = ResourceManagementClient(config)
 
