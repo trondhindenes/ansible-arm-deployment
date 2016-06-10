@@ -144,6 +144,8 @@ def main():
         creds_params['subscription_id'] = module.params.get('subscription_id')
     if module.params['profile']:
         profile = module.params.get('profile')
+    else:
+        profile = None
     if module.params['ad_user']:
         creds_params['ad_user'] = module.params.get('ad_user')
     if module.params['password']:
