@@ -99,11 +99,13 @@ HAS_ARM = False
 
 try:
     from azure.mgmt.resource.resources.models import ResourceGroup
-    from azure.mgmt.resource.resources import ResourceManagementClient, ResourceManagementClientConfiguration
+    from azure.mgmt.resource.resources import ResourceManagementClient
     from azure.common.credentials import ServicePrincipalCredentials, UserPassCredentials
     HAS_ARM = True
 except ImportError:
     pass
+
+
 
 def get_token_from_client_credentials(endpoint, client_id, client_secret):
     payload = {
@@ -213,8 +215,7 @@ def main():
         module.fail_json(msg="Unable to select a working Azure subscription given the current parameters/options")
 
     #construct resource client
-    config = ResourceManagementClientConfiguration(creds, creds_params['subscription_id'])
-    resource_client = ResourceManagementClient(config)
+    resource_client = ResourceManagementClient(credentials=creds, subscription_id=creds_params['subscription_id'])
     
     #Check rg
     try:
