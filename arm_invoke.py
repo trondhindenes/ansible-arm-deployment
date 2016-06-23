@@ -287,7 +287,7 @@ def main():
         module.fail_json(msg="We shouldn't be here.")
     returnobj.url = url
     
-    if result.status_code in (200, 201):
+    if result.status_code in (200, 201, 202):
         returnobj.changed = True
         if result.headers.get('azure-asyncoperation'):
             # This is an async operation, pull until done
