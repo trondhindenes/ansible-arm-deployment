@@ -94,6 +94,7 @@ import os.path
 import ConfigParser
 from os.path import expanduser
 import logging
+import json
 
 HAS_ARM = False
 
@@ -303,12 +304,24 @@ def main():
                     module.fail_json(msg=errorMsg, status_code=result.status_code, url=url)
                 elif str(currentStatus).lower() == 'inprogress':
                     currentOp = 'updating'
-                    time.sleep(2)
+                    time.sleep(0.5)
                 elif str(currentStatus).lower() == 'succeeded':
                     currentOp = 'succeeded'
                     module.exit_json(changed=True, status_code=result.status_code, url=url, content=result.json())
                 else:
                     pass
+        elif result.status_code == 202 and result.headers.get('location'):
+            async_url = result.headers.get('location')
+            currentOp = 'updating'
+            while currentOp == 'updating':
+                result = requests.get(async_url, headers=headers)
+                if result.status_code == 202:
+                    # Operation not finished
+                    time.sleep(0.5)
+                elif result.status_code == 200:
+                    currentOp = 'succeeded'
+                else:
+                    module.fail_json(msg='Error while waiting for resource to be provisioned', status_code=result.status_code, url=async_url)
 
         module.exit_json(changed=True, status_code=result.status_code, url=url, content=result.json())
     elif result.status_code == 204:
