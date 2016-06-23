@@ -93,7 +93,7 @@ HAS_ARM = False
 
 try:
     from azure.mgmt.resource.resources.models import ResourceGroup
-    from azure.mgmt.resource.resources import ResourceManagementClient, ResourceManagementClientConfiguration
+    from azure.mgmt.resource.resources import ResourceManagementClient
     from azure.common.credentials import ServicePrincipalCredentials, UserPassCredentials
     HAS_ARM = True
 except ImportError:
@@ -150,8 +150,10 @@ def main():
         creds_params['ad_user'] = module.params.get('ad_user')
     if module.params['password']:
         creds_params['password'] = module.params.get('password')
-
-    resource_group_name = module.params.get('resource_group_name')
+    if module.params['resource_group_name']:
+        resource_group_name = module.params.get('resource_group_name')
+    else:
+        resource_group_name = None
     resource_url = module.params.get('resource_url')
     if module.params['raw_url']:
         raw_url = module.params.get('raw_url')
@@ -197,15 +199,20 @@ def main():
         module.fail_json(msg="Unable to select a working Azure subscription given the current parameters/options")
 
     #construct resource client
-    config = ResourceManagementClientConfiguration(creds, creds_params['subscription_id'])
-    resource_client = ResourceManagementClient(config)
-    
+    #config = ResourceManagementClientConfiguration(creds, creds_params['subscription_id'])
+
+    resource_client = ResourceManagementClient(credentials=creds, subscription_id=creds_params['subscription_id'])
+
+    if resource_url and not resource_group_name:
+        module.fail_json(msg="resource url was specified but resource_group_name was not")
+
     #Check rg
-    try:
-        rg_list_result = resource_client.resource_groups.get(resource_group_name)
-        rg_does_exist = 'True'
-    except:
-        rg_does_exist = 'False'
+    if resource_group_name:
+        try:
+            rg_list_result = resource_client.resource_groups.get(resource_group_name)
+            rg_does_exist = 'True'
+        except:
+            rg_does_exist = 'False'
     
     #Create RG if necessary
     if resource_url:

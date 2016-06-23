@@ -105,7 +105,7 @@ HAS_ARM = False
 
 try:
     from azure.mgmt.resource.resources.models import ResourceGroup, DeploymentProperties, DeploymentMode
-    from azure.mgmt.resource.resources import ResourceManagementClient, ResourceManagementClientConfiguration
+    from azure.mgmt.resource.resources import ResourceManagementClient
     from azure.common.credentials import ServicePrincipalCredentials, UserPassCredentials
     HAS_ARM = True
 except ImportError:
@@ -189,7 +189,7 @@ def main():
 
         if not config.has_section(profile):
             module.fail_json(("Config file does not appear to have section " + profile)
-        for key, val in config.items(profile):
+        for key, val in (config.items(profile)):
             creds_params[key] = val
 
     
@@ -214,8 +214,8 @@ def main():
             msg="Unable to select a working Azure subscription given the current parameters/options")
 
     #construct resource client
-    config = ResourceManagementClientConfiguration(creds, creds_params['subscription_id'])
-    resource_client = ResourceManagementClient(config)
+
+    resource_client = ResourceManagementClient(credentials=creds, subscription_id=creds_params['subscription_id'])
 
     #Check rg
     try:
@@ -286,5 +286,4 @@ def main():
 
 # Import module snippets
 from ansible.module_utils.basic import *
-
 main()
