@@ -196,14 +196,14 @@ def main():
             creds_params[key] = val
 
     if 'client_id' in creds_params and 'client_secret' in creds_params:
-        endpoint='https://login.microsoftonline.com/' + creds_params['tenant_id'] + '/oauth2/token'
+        endpoint = 'https://login.microsoftonline.com/' + creds_params['tenant_id'] + '/oauth2/token'
         auth_token = get_token_from_client_credentials(
           endpoint=endpoint,
           client_id=creds_params['client_id'],
           client_secret=creds_params['client_secret'],
         )
         creds = ServicePrincipalCredentials(client_id=creds_params['client_id'], secret=creds_params['client_secret'],
-                                          tenant=creds_params['tenant_id'])
+                                            tenant=creds_params['tenant_id'])
 
     elif 'ad_user' in creds_params and 'password' in creds_params:
         creds = UserPassCredentials(creds_params['ad_user'], creds_params['password'])
@@ -224,6 +224,7 @@ def main():
         rg_does_exist = 'True'
     except:
         rg_does_exist = 'False'
+
     
     #Create RG if necessary
     if module.params['state'] == 'present':
@@ -263,6 +264,7 @@ def main():
 
     #Check if the resource exists
     result = None
+    exception_message = ""
     does_exist_request = requests.get(url, headers=headers)
     if does_exist_request.status_code in (400, 404):
         does_exist = False
@@ -270,10 +272,13 @@ def main():
         does_exist = True
     
     if (does_exist is False) and (module.params['state'] is 'present'):
-        if src_json is 'none':
-            result = requests.put(url, headers=headers)
-        else:
-            result = requests.put(url, headers=headers, data=jsonpayload)
+        try:
+            if src_json is 'none':
+                result = requests.put(url, headers=headers)
+            else:
+                result = requests.put(url, headers=headers, data=jsonpayload)
+        except Exception as e:
+            exception_message = str(e)
 
     if (does_exist == False) and (module.params['state'] == 'absent'):
         module.exit_json(changed=False, status_code=None, url=url)
@@ -285,7 +290,7 @@ def main():
         result = requests.delete(url, headers=headers)
 
     if not result:
-        module.fail_json(msg="We shouldn't be here.")
+        module.fail_json(msg="We shouldn't be here. Exception: " + exception_message)
     returnobj.url = url
     
     if result.status_code in (200, 201, 202):
