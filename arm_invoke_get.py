@@ -65,6 +65,8 @@ options:
     description:
         - Use if you want to specify the whole uri, e.g /subscriptions/xxx/providers/microsoft.sql?api-version=2014-01-preview. Useful when getting stuff which isn't inside a resource group. Mutually excludes "resource_url"
     required: False        
+  delete:
+    perform a delete
 notes:
   - This module requres Azure v.2.0.0RC3 on the target node (see https://azure.microsoft.com/en-us/documentation/articles/python-how-to-install/)
 '''
@@ -123,7 +125,8 @@ def main():
             password=dict(required=False),
             resource_group_name = dict(required=False),
             resource_url = dict(required=False),
-            raw_url = dict(required=False)
+            raw_url = dict(required=False),
+            delete = dict(required=False, default=False, type='bool'),
         ),
         # Implementing check-mode using HEAD is impossible, since size/date is not 100% reliable
         supports_check_mode = False,
@@ -159,7 +162,7 @@ def main():
         raw_url = module.params.get('raw_url')
     else:
         raw_url = None
-    
+    delete = module.params['delete']
     url_method = 'get'
     #try:
 
@@ -236,7 +239,10 @@ def main():
 
     #Check if the resource exists
     result = None
-    does_exist_request = requests.get(url, headers=headers)
+    if delete is False:
+        does_exist_request = requests.get(url, headers=headers)
+    elif delete is True:
+        does_exist_request = requests.delete(url, headers=headers)
     if does_exist_request.status_code in (400, 404):
         does_exist = False
     else:

@@ -180,7 +180,7 @@ def main():
         resource_group_location = module.params.get('resource_group_location')
     else:
         resource_group_location = 'none'
-    force = params['force']
+    force = module.params['force']
     url_method = 'put'
     #try:
     
@@ -275,7 +275,7 @@ def main():
     else:
         does_exist = True
     
-    if ((does_exist is False) and (module.params['state'] is 'present')) or ((does_exist is False) and force is True):
+    if ((does_exist is False) and (module.params['state'] is 'present')) or ((does_exist is True) and (force is True) and (module.params['state'] is 'present')):
         try:
             if src_json is 'none':
                 result = requests.put(url, headers=headers)
