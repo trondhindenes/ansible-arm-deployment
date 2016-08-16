@@ -274,7 +274,7 @@ def main():
     #Check if the resource exists
     result = None
     exception_message = ""
-    if check_existing:
+    if check_existing is False:
         does_exist = False
     else:
         does_exist_request = requests.get(url, headers=headers)
