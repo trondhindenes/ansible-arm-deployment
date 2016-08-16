@@ -68,6 +68,9 @@ options:
   state:
     description:
       - present/absent
+  force:
+    description:
+      - By default the module will not perform any changes against existing resources. The force flag allows overriding this, so that the request will always be sent. Only works when state=present
 notes:
   - This module requres Azure v.2.0.0RC3 on the target node (see https://azure.microsoft.com/en-us/documentation/articles/python-how-to-install/)
 '''
@@ -134,7 +137,8 @@ def main():
             resource_group_name = dict(required=True),
             resource_group_location = dict(),
             resource_url = dict(required=True),
-            state = dict(default='present', choices=['absent', 'present'])
+            state = dict(default='present', choices=['absent', 'present']),
+            force = dict(required=False, default=False, type='bool'),
         ),
         # Implementing check-mode using HEAD is impossible, since size/date is not 100% reliable
         supports_check_mode = False,
@@ -176,7 +180,7 @@ def main():
         resource_group_location = module.params.get('resource_group_location')
     else:
         resource_group_location = 'none'
-    
+    force = params['force']
     url_method = 'put'
     #try:
     
@@ -271,7 +275,7 @@ def main():
     else:
         does_exist = True
     
-    if (does_exist is False) and (module.params['state'] is 'present'):
+    if ((does_exist is False) and (module.params['state'] is 'present')) or ((does_exist is False) and force is True):
         try:
             if src_json is 'none':
                 result = requests.put(url, headers=headers)
