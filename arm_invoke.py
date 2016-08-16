@@ -71,6 +71,9 @@ options:
   force:
     description:
       - By default the module will not perform any changes against existing resources. The force flag allows overriding this, so that the request will always be sent. Only works when state=present
+  check_existing:
+    description:
+      - Disable check for existing resource
 notes:
   - This module requres Azure v.2.0.0RC3 on the target node (see https://azure.microsoft.com/en-us/documentation/articles/python-how-to-install/)
 '''
@@ -139,6 +142,7 @@ def main():
             resource_url = dict(required=True),
             state = dict(default='present', choices=['absent', 'present']),
             force = dict(required=False, default=False, type='bool'),
+            check_existing = dict(required=False, default=True, type='bool'),
         ),
         # Implementing check-mode using HEAD is impossible, since size/date is not 100% reliable
         supports_check_mode = False,
@@ -181,6 +185,7 @@ def main():
     else:
         resource_group_location = 'none'
     force = module.params['force']
+    check_existing = module.params['check_existing']
     url_method = 'put'
     #try:
     
@@ -269,12 +274,15 @@ def main():
     #Check if the resource exists
     result = None
     exception_message = ""
-    does_exist_request = requests.get(url, headers=headers)
-    if does_exist_request.status_code in (400, 404):
+    if check_existing:
         does_exist = False
     else:
-        does_exist = True
-    
+        does_exist_request = requests.get(url, headers=headers)
+        if does_exist_request.status_code in (400, 404):
+            does_exist = False
+        else:
+            does_exist = True
+        
     if ((does_exist is False) and (module.params['state'] is 'present')) or ((does_exist is True) and (force is True) and (module.params['state'] is 'present')):
         try:
             if src_json is 'none':
